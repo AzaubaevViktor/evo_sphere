@@ -36,7 +36,7 @@ class Game:
 
         # Cooldown на выстрел
         self.cooldowns = np.zeros((count, 1))
-        self.cooldown = 100
+        self.cooldown = 10
 
         # Пули
         self._bullet_speed = bullet_speed
@@ -96,6 +96,14 @@ class Game:
         self.bullets_speed[:, 1] = np.sin(self.bullets_angle).flatten()
 
         self.bullets += self.bullets_speed * d_time * self._bullet_speed
+
+        droped = (self.bullets[:, 0] < 0) + (self.bullets[:, 1] < 0) + \
+                 (self.bullets[:, 0] > self.size[0]) + (self.bullets[:, 1] > self.size[1])
+        droped = droped.reshape((len(droped), 1))
+        droped = droped.nonzero()[0]
+
+        self.bullets = np.delete(self.bullets, droped, 0)
+        self.bullets_angle = np.delete(self.bullets_angle, droped, 0)
 
         # Cooldowns
         self.cooldowns -= d_time
