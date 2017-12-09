@@ -1,5 +1,5 @@
 import numpy as np
-import pygame
+import time
 
 from controller import PyGameController, Move, Action
 from model import Game
@@ -11,6 +11,8 @@ view = PyGameView(model)
 
 controller = PyGameController()
 
+start = time.time()
+count = 0
 
 while True:
     model.step(1)
@@ -25,4 +27,11 @@ while True:
             model.angle_accel[0] += action.dx
         elif isinstance(action, Action):
             action()
+
+    count += 1
+
+    if time.time() - start > 1:
+        print("{:.1f} FPS".format(count / (time.time() - start)))
+        count = 0
+        start = time.time()
 
