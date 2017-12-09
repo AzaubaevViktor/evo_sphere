@@ -16,11 +16,11 @@ class Move(Action):
     def __init__(self, dx, dy):
         self.dx, self.dy = (dx, dy)
 
+class Shot(Action):
+    pass
+
 
 class PyGameController:
-    def __init__(self):
-        pygame.key.set_repeat(10, 100)
-
     def actions(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT: yield Exit()
@@ -31,5 +31,6 @@ class PyGameController:
         if pressed[pygame.K_RIGHT]: yield Move(0.0001, 0)
         if pressed[pygame.K_UP]: yield Move(0, 0.01)
         if pressed[pygame.K_DOWN]: yield Move(0, -0.001)
+        if pressed[pygame.K_SPACE]: yield Shot()
 
 

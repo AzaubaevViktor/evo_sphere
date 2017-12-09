@@ -1,7 +1,7 @@
 import numpy as np
 import time
 
-from controller import PyGameController, Move, Action
+from controller import PyGameController, Move, Action, Shot
 from model import Game
 from view import PyGameView
 
@@ -25,6 +25,8 @@ while True:
             model.accel[0, 1] += action.dy * np.sin(model.angle[0])
 
             model.angle_accel[0] += action.dx
+        if isinstance(action, Shot):
+            model.add_bullet(0)
         elif isinstance(action, Action):
             action()
 

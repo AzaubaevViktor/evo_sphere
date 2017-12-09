@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import numpy as np
 
 
@@ -6,14 +8,16 @@ class Game:
                  count,
                  size=(640, 480),
                  radius=11,
-                 friction=0.01
+                 friction=0.01,
+                 bullet_speed=5
                  ):
         """
         Класс игры
         :param count: Количество существ
         :param size: Размеры экрана (x, y)
         :param radius: Размер создания
-        :param friction: Коэффициент трения
+        :param friction: Коэффициент трения для передвижения
+        :param bullet_speed: Скорость пули за шаг времени
         """
         self.radius = radius
         self.size = size
@@ -29,6 +33,34 @@ class Game:
         self.angle = np.zeros((count, 1))
         self.angle_speed = np.zeros((count, 1))
         self.angle_accel = np.zeros((count, 1))
+
+        # Cooldown на выстрел
+        self.cooldowns = np.zeros((count, 1))
+        self.cooldown = 100
+
+        # Пули
+        self._bullet_speed = bullet_speed
+        self.bullets_speed = np.zeros((0, 2))
+        self.bullets = np.zeros((0, 2))
+        self.bullets_angle = np.zeros((0, 1))
+
+    def add_bullet(self, _id):
+        if self.cooldowns[_id] == 0:
+            center = self.coord[_id]
+            angle = self.angle[_id]
+            vec = np.array((np.cos(angle), np.sin(angle))).flatten(0)
+            vec_p = vec[::-1].flatten(0)
+            vec_p[0] = - vec_p[0]
+            bullets = [
+                center + (vec_p + vec) * self.radius,
+                center + (-vec_p + vec) * self.radius
+            ]
+
+            for bullet in bullets:
+                self.bullets = np.vstack((self.bullets, bullet))
+                self.bullets_angle = np.vstack((self.bullets_angle, [angle]))
+
+            self.cooldowns[_id] = self.cooldown
 
     def step(self, d_time: float):
         """
@@ -57,6 +89,17 @@ class Game:
         self.angle_speed *= (1 - self.friction * d_time)
         self.angle_speed += self.angle_accel * d_time
         self.angle += self.angle_speed * d_time
+
+        # Bullets
+        self.bullets_speed = np.zeros_like(self.bullets)
+        self.bullets_speed[:, 0] = np.cos(self.bullets_angle).flatten()
+        self.bullets_speed[:, 1] = np.sin(self.bullets_angle).flatten()
+
+        self.bullets += self.bullets_speed * d_time * self._bullet_speed
+
+        # Cooldowns
+        self.cooldowns -= d_time
+        self.cooldowns *= self.cooldowns > 0
 
         # Drop
         self.accel.fill(0)
