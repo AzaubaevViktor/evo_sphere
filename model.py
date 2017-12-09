@@ -39,7 +39,7 @@ class Game:
         # Отражение от левой стены
         self.dist = self.coord - np.full_like(self.coord, self.radius)
         self.dist *= self.dist < 0
-        self.accel += np.abs(self.dist) / self.radius ** 2
+        self.accel += np.abs(self.dist) * d_time / self.radius ** 2
 
         # Отражение от правой стены
         wall = np.full_like(self.coord, self.size[0])
@@ -47,7 +47,7 @@ class Game:
 
         self.dist = wall - self.radius - self.coord
         self.dist *= self.dist < 0
-        self.accel -= np.abs(self.dist) / self.radius ** 2
+        self.accel -= np.abs(self.dist) * d_time / self.radius ** 2
 
         # Apply
         self.speed *= (1 - self.friction * d_time)
