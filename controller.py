@@ -19,13 +19,17 @@ class Move(Action):
 
 class PyGameController:
     def __init__(self):
-        pass
+        pygame.key.set_repeat(10, 100)
 
     def actions(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT: yield Exit()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT: yield Move(-1, 0)
-                if event.key == pygame.K_RIGHT: yield Move(1, 0)
-                if event.key == pygame.K_UP: yield Move(0, -1)
-                if event.key == pygame.K_DOWN: yield Move(0, 1)
+
+        pressed = pygame.key.get_pressed()
+
+        if pressed[pygame.K_LEFT]: yield Move(-0.0001, 0)
+        if pressed[pygame.K_RIGHT]: yield Move(0.0001, 0)
+        if pressed[pygame.K_UP]: yield Move(0, 0.01)
+        if pressed[pygame.K_DOWN]: yield Move(0, -0.001)
+
+

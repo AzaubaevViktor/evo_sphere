@@ -1,3 +1,4 @@
+import numpy as np
 import pygame
 
 from controller import PyGameController, Move, Action
@@ -18,8 +19,10 @@ while True:
 
     for action in controller.actions():
         if isinstance(action, Move):
-            model.accel[0, 0] = action.dx
-            model.accel[0, 1] = action.dy
+            model.accel[0, 0] += action.dy * np.cos(model.angle[0])
+            model.accel[0, 1] += action.dy * np.sin(model.angle[0])
+
+            model.angle_accel[0] += action.dx
         elif isinstance(action, Action):
             action()
 
