@@ -62,12 +62,7 @@ class Game:
 
             self.cooldowns[_id] = self.cooldown
 
-    def step(self, d_time: float):
-        """
-        Шаг симуляции
-        :param d_time: Шаг времени
-        :return:
-        """
+    def _walls(self, d_time: float):
         # Отражение от левой стены
         self.dist = self.coord - np.full_like(self.coord, self.radius)
         self.dist *= self.dist < 0
@@ -81,6 +76,7 @@ class Game:
         self.dist *= self.dist < 0
         self.accel -= np.abs(self.dist) * d_time / self.radius ** 2
 
+    def _move(self, d_time: float):
         # Apply
         self.speed *= (1 - self.friction * d_time)
         self.speed += self.accel * d_time
@@ -90,6 +86,7 @@ class Game:
         self.angle_speed += self.angle_accel * d_time
         self.angle += self.angle_speed * d_time
 
+    def _bullets(self, d_time: float):
         # Bullets
         self.bullets_speed = np.zeros_like(self.bullets)
         self.bullets_speed[:, 0] = np.cos(self.bullets_angle).flatten()
@@ -98,7 +95,8 @@ class Game:
         self.bullets += self.bullets_speed * d_time * self._bullet_speed
 
         droped = (self.bullets[:, 0] < 0) + (self.bullets[:, 1] < 0) + \
-                 (self.bullets[:, 0] > self.size[0]) + (self.bullets[:, 1] > self.size[1])
+                 (self.bullets[:, 0] > self.size[0]) + (
+                         self.bullets[:, 1] > self.size[1])
         droped = droped.reshape((len(droped), 1))
         droped = droped.nonzero()[0]
 
@@ -109,9 +107,19 @@ class Game:
         self.cooldowns -= d_time
         self.cooldowns *= self.cooldowns > 0
 
+    def _drop_accel(self, d_time: float):
         # Drop
         self.accel.fill(0)
         self.angle_accel.fill(0)
 
+    def step(self, d_time: float):
+        """
+        Шаг симуляции
+        :param d_time: Шаг времени
+        :return:
+        """
+        self._walls(d_time)
+        self._move(d_time)
+        self._bullets(d_time)
 
-
+        self._drop_accel(d_time)
